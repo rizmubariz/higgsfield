@@ -17,4 +17,15 @@ Finished size 90 × 55 mm, landscape, double-sided, 3 mm bleed on every side, 5 
 ## Before printing, confirm
 - Social handles `@DanaThrive` (Instagram and TikTok) and `Dana Thrive` (Facebook) come from the reference design. The website project has no social links, so check these are your real accounts.
 - Square corners are standard. For the rounded corners in the reference image, ask the printer for 3 mm round-corner die cutting. The artwork already allows for it.
-- The gold is printed ink, not foil. For real gold foil, ask the printer for a foil mask; the gold elements can be separated onto their own layer.
+- The standard files print the gold as ink. For real metallic gold, use the foil files below.
+
+## Gold foil option
+For metallic gold foil instead of printed gold ink, send these two files together and ask for **"gold foil, front and back"**:
+- `print/DanaThrive_FOIL-OPTION_1_Artwork_CMYK_noGold.pdf`: the CMYK artwork with every gold element removed.
+- `print/DanaThrive_FOIL-OPTION_2_GoldFoilMask_100K.pdf`: the foil mask. Solid 100% black (K only) marks where foil goes, in the same position and size as the artwork. Page 1 is the front, page 2 the back.
+
+Foiled elements:
+- **Front:** logo, wordmark, gold rule and tagline.
+- **Back:** wordmark, contact and social icons, gold divider lines, the curved gold line and the bullets in the services line.
+
+The small logo in the centre of the QR code stays printed (CMYK), so foil can't affect scanning. All foil lines are at least 0.3 mm and the smallest foiled text is 7.2 pt. Most Australian printers accept these minimums, but check with yours.

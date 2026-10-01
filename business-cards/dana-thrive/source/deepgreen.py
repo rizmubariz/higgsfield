@@ -87,6 +87,23 @@ CSS = BASE_CSS + f"""
 """
 
 
+FOIL_SEL = {"front": ".mark, .wm, .rule, .tag",
+            "back": ".wm, .ci, .vr, .socials .ic, .hr, .services .sep, .sweep"}
+
+
+def foil_css(side, mode):
+    """mode: print (all CMYK) | nofoil (CMYK minus foil elements) | foil (100% K foil mask)."""
+    sel = FOIL_SEL[side]
+    if mode == "nofoil":
+        return f"{sel}{{visibility:hidden !important}}"
+    if mode == "foil":
+        each = ", ".join(f"{s.strip()} *" for s in sel.split(","))
+        return (f".card{{background:#fff !important}} .card *{{visibility:hidden}} "
+                f"{sel}, {each}{{visibility:visible !important;color:#000 !important;opacity:1 !important}} "
+                f".rule, .vr, .hr{{background:#000 !important}} .sweep{{stroke:#000 !important;stroke-opacity:1 !important}}")
+    return ""
+
+
 def page(css, body, marks=False):
     if not marks:
         return (f'<!doctype html><html><head><meta charset="utf-8"><style>{CSS}{css}</style></head>'
@@ -108,7 +125,7 @@ def page(css, body, marks=False):
 
 
 # ---------------------------------------------------------------- FRONT
-def front(marks=False):
+def front(marks=False, mode="print"):
     art = svg_layer(
         # top-left cluster (bleeds off the corner)
         leaf(-6, 20, 30, 7.5, -38, "lfC", vein_op=0.25)
@@ -124,7 +141,7 @@ def front(marks=False):
 .wm{{position:absolute;left:50%;top:28.4mm;width:42mm;transform:translateX(-50%)}}
 .sub{{position:absolute;left:0;right:0;top:36.3mm;text-align:center;font-size:6.6pt;font-weight:500;
       letter-spacing:0.24em;color:{CREAM_MUTED};padding-left:0.24em}}
-.rule{{position:absolute;left:50%;top:41.2mm;width:9mm;height:0.25mm;background:{GOLD};transform:translateX(-50%);opacity:.9}}
+.rule{{position:absolute;left:50%;top:41.2mm;width:9mm;height:0.3mm;background:{GOLD};transform:translateX(-50%);opacity:.9}}
 .tag{{position:absolute;left:0;right:0;top:44.2mm;text-align:center;font-size:7.2pt;font-weight:500;
       letter-spacing:0.14em;color:{GOLD_LT};padding-left:0.14em;white-space:nowrap}}
 """
@@ -132,11 +149,12 @@ def front(marks=False):
             f'<img class="wm" src="{A}/gold-wordmark.png" alt="Dana Thrive">'
             f'<p class="sub caps">{C["sub"]}</p><div class="rule"></div>'
             f'<p class="tag caps">{C["tagline"]}</p></div>')
-    return page(css, body, marks)
+    html = page(css + foil_css("front", mode), body, marks)
+    return html.replace("gold-icon.png", "foil-icon.png").replace("gold-wordmark.png", "foil-wordmark.png") if mode == "foil" else html
 
 
 # ---------------------------------------------------------------- BACK
-def back(marks=False):
+def back(marks=False, mode="print"):
     ver, n, m, qr = qr_svg(18.0, GREEN_BG)
     qz = m * 4
     tile = 18.0 + 2 * qz
@@ -145,7 +163,7 @@ def back(marks=False):
         + leaf(98, -4, 30, 7.5, 128, "lfA")
         + leaf(88, -5, 18, 4.5, 105, "lfB", vein_op=0.3)
         # fine gold sweep hugging the leaf cluster
-        + f'<path d="M66 -3 C74 1.5 84 4 90 9.5 C93.5 13 95.5 19 100 25" fill="none" stroke="{GOLD}" stroke-width="0.3" stroke-opacity="0.85" stroke-linecap="round"/>'
+        + f'<path class="sweep" d="M66 -3 C74 1.5 84 4 90 9.5 C93.5 13 95.5 19 100 25" fill="none" stroke="{GOLD}" stroke-width="0.35" stroke-opacity="0.85" stroke-linecap="round"/>'
     )
     rows = [("phone", C["phone"]), ("envelope-simple", C["email"]), ("globe-simple", C["web"]), ("map-pin", C["loc"])]
     contacts = "".join(f'<li><span class="ci">{icon(i, "fill")}</span><span class="nowrap">{t}</span></li>' for i, t in rows)
@@ -158,14 +176,14 @@ def back(marks=False):
 .contacts{{position:absolute;left:5mm;top:16.6mm;list-style:none;display:flex;flex-direction:column;gap:1.75mm}}
 .contacts li{{display:flex;align-items:center;gap:2.2mm;font-size:8pt;line-height:1;color:{CREAM};font-weight:400;letter-spacing:0.01em}}
 .ci{{color:{GOLD};display:flex}}
-.vr{{position:absolute;left:58.6mm;top:15mm;width:0.2mm;height:21mm;background:{GOLD};opacity:.55}}
+.vr{{position:absolute;left:58.5mm;top:15mm;width:0.3mm;height:21mm;background:{GOLD};opacity:.55}}
 .qrwrap{{position:absolute;right:5mm;top:12.4mm;width:{tile:.2f}mm}}
 .qrtile{{width:{tile:.2f}mm;height:{tile:.2f}mm;padding:{qz:.3f}mm;background:{CREAM};border-radius:1.2mm}}
 .qrlabel{{margin-top:1.2mm;text-align:center;font-size:6.4pt;font-weight:500;color:{CREAM_MUTED};letter-spacing:0.03em;white-space:nowrap}}
 .socials{{position:absolute;left:5mm;right:5mm;top:40.6mm;list-style:none;display:flex;justify-content:space-between}}
 .socials li{{display:flex;align-items:center;gap:1.4mm;font-size:7pt;line-height:1;color:{CREAM}}}
 .socials .ic{{width:2.9mm;height:2.9mm;color:{GOLD}}}
-.hr{{position:absolute;left:5mm;right:5mm;top:45.1mm;height:0.2mm;background:{GOLD};opacity:.55}}
+.hr{{position:absolute;left:5mm;right:5mm;top:45.1mm;height:0.3mm;background:{GOLD};opacity:.55}}
 .services{{position:absolute;left:5mm;right:5mm;top:47mm;text-align:center;font-size:6.1pt;font-weight:500;color:{CREAM_MUTED};white-space:nowrap;line-height:1}}
 .services .sep{{color:{GOLD};margin:0 1.1mm}}
 """
@@ -175,7 +193,10 @@ def back(marks=False):
             f'<div class="qrwrap"><div class="qrtile">{qr}</div><p class="qrlabel">Scan to learn more</p></div>'
             f'<ul class="socials">{socials}</ul><div class="hr"></div>'
             f'<p class="services">{sep.join(C["services"])}</p></div>')
-    return page(css, body, marks), ver, n, m
+    html = page(css + foil_css("back", mode), body, marks)
+    if mode == "foil":
+        html = html.replace("gold-wordmark.png", "foil-wordmark.png")
+    return html, ver, n, m
 
 
 if __name__ == "__main__":
@@ -185,4 +206,7 @@ if __name__ == "__main__":
     b, ver, n, m = back()
     open(f"{ROOT}/html/dg-back.html", "w").write(b)
     open(f"{ROOT}/html/dg-back-marks.html", "w").write(back(True)[0])
+    for mode in ("nofoil", "foil"):
+        open(f"{ROOT}/html/dg-front-{mode}.html", "w").write(front(False, mode))
+        open(f"{ROOT}/html/dg-back-{mode}.html", "w").write(back(False, mode)[0])
     print(f"QR: version {ver}, ECC H, {n} modules, module {m:.3f} mm, code 18 mm, quiet zone {4*m:.2f} mm")
